@@ -6,12 +6,22 @@ using System.Text;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
+/// <summary>
+/// Controller for managing albums.
+/// </summary>
 namespace albums_api.Controllers
 {
+    /// <summary>
+    /// Handles HTTP requests related to albums.
+    /// </summary>
     [Route("albums")]
     [ApiController]
     public class AlbumController : ControllerBase
     {
+        /// <summary>
+        /// Retrieves all albums from the database.
+        /// </summary>
+        /// <returns>A list of all albums.</returns>
         // GET: api/album
         [HttpGet]
         public IActionResult Get()
@@ -21,6 +31,11 @@ namespace albums_api.Controllers
             return Ok(albums);
         }
 
+        /// <summary>
+        /// Retrieves a specific album by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the album to retrieve.</param>
+        /// <returns>The album with the specified ID, or a 404 Not Found if it doesn't exist.</returns>
         // GET api/<AlbumController>/5
         [HttpGet("{id}")]
         public IActionResult Get(int id)
@@ -34,6 +49,11 @@ namespace albums_api.Controllers
             return Ok(album);
         }
 
+        /// <summary>
+        /// Retrieves all albums sorted by the specified field.
+        /// </summary>
+        /// <param name="sortBy">The field to sort by (title, artist, or price).</param>
+        /// <returns>A list of albums sorted by the specified field.</returns>
         // GET: albums/sorted?sortBy=title|artist|price
         [HttpGet("sorted")]
         public IActionResult GetSorted([FromQuery] string sortBy = "title")

@@ -37,6 +37,10 @@ const albums = ref<Album[]>([])
 const loading = ref<boolean>(true)
 const error = ref<string | null>(null)
 
+/**
+ * Fetches the album list from the API and updates the UI state.
+ * Displays a friendly error message if the request fails.
+ */
 const fetchAlbums = async (): Promise<void> => {
   try {
     loading.value = true
