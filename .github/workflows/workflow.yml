@@ -1,0 +1,58 @@
+# GitHub Action workflow that runs on push to main branch
+# Docker build and push the album-api image to ACR
+
+name: Build and Push album-api
+
+"on":
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push album-api image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.ACR_LOGIN_SERVER }}/album-api:${{ github.sha }}
+            ${{ secrets.ACR_LOGIN_SERVER }}/album-api:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/album-api:${{ github.run_id }}
+
+      - name: Run tests on album-api image
+        run: docker run --rm ${{ secrets.ACR_LOGIN_SERVER }}/album-api:${{ github.sha }} pytest
+
+      - name: Set manifest version
+        run: find . -name appmanifest.yml -type f -exec sed -i 's/%%VERSION%%/${{ github.run_id }}/g' {} +
+
+      - name: Set AKS context
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ secrets.DEV_AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ secrets.DEV_AKS_CLUSTER_NAME }}
+          admin: true
+
+      - name: Deploy album-api image to dev AKS
+        run: |
+          kubectl set image deployment/album-api album-api=${{ secrets.ACR_LOGIN_SERVER }}/album-api:${{ github.sha }} --namespace dev
+          kubectl rollout status deployment/album-api --namespace dev

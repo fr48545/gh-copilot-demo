@@ -7,6 +7,7 @@ param appInsightsName string = 'appinsights-${uniqueSuffix}'
 param storageAccountName string = 'storage${replace(uniqueSuffix, '-', '')}'
 param blobContainerName string = 'albums'
 param registryName string
+param azureOpenAIName string = 'openai-${uniqueSuffix}'
 @secure()
 param registryPassword string
 
@@ -129,3 +130,28 @@ output env array=[
   'Storage account name: ${storageAccount.name}'
   'Storage container name: ${blobContainer.name}'
 ]
+
+// Container Registry
+resource containerRegistry 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
+  name: registryName
+  location: location
+  sku: {
+    name: 'Basic'
+  }
+  properties: {
+    adminUserEnabled: true
+  }
+}
+
+// Azure Open AI resource
+resource azureOpenAI 'Microsoft.CognitiveServices/accounts@2022-12-01' = {
+  name: azureOpenAIName
+  location: location
+  sku: {
+    name: 'S0'
+  }
+  kind: 'OpenAI'
+  properties: {
+    publicNetworkAccess: 'Enabled'
+  }
+}
