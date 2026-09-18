@@ -76,6 +76,15 @@ namespace albums_api.Controllers
             return Ok(sortedAlbums);
         }
 
+        /// <summary>
+        /// Generates a random integer between 1 and 10, inclusive.
+        /// </summary>
+        /// <returns>A random integer between 1 and 10.</returns>
+        private static int GenerateRandomNumber()
+        {
+            return Random.Shared.Next(1, 11);
+        }
+
     }
 
     
